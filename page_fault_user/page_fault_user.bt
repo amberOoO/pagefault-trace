@@ -1,0 +1,11 @@
+#!/usr/bin/bpftrace
+
+BEGIN {
+    printf("pid,name,addr,error_code,instruction_ptr,time\n")
+}
+
+tracepoint:exceptions:page_fault_user {
+    printf("%d,%s,%p,%d,%p,%lu\n", pid, comm, args.address, args.error_code, args.ip, nsecs());
+}
+
+// 'BEGIN {printf("pid,name,addr,error_code,instruction_ptr,time\n")} tracepoint:exceptions:page_fault_user {printf("%d,%s,%p,%d,%p,%lu\n", pid, comm, args.address, args.error_code, nsecs());}'
