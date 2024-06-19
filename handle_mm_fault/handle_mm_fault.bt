@@ -1,5 +1,5 @@
 BEGIN {
-    printf("pid,name,addr,flags,time,retval\n");
+    printf("pid,name,addr,flags,s_time,e_time,time,retval\n");
 }
 
 kprobe:handle_mm_fault {
@@ -9,9 +9,12 @@ kprobe:handle_mm_fault {
 }
 
 kretprobe:handle_mm_fault {
-    $latency = nsecs() - @start[tid];  // 计算延时
+    $e_time = nsecs();
+    $latency = $e_time - @start[tid];  // 计算延时
     //printf("%d,%s,%p,%lu,%lu,%lu\n", pid, comm, args.address, args.flags, nsecs(), retval);
-    printf("%d,%s,%p,%lu,%lu,%lu\n", pid, comm, @arg1[tid], @arg2[tid], $latency, retval);
+    //printf("%d,%s,%p,%lu,%lu,%lu\n", pid, comm, @arg1[tid], @arg2[tid], $latency, retval);
+    // 附带开始结束事件
+    printf("%d,%s,%p,%lu,%lu,%lu,%lu,%lu\n", pid, comm, @arg1[tid], @arg2[tid], @start[tid], $e_time, $latency, retval); 
 
     delete(@arg1[tid]);
     delete(@arg2[tid]);
